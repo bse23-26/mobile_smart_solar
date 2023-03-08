@@ -13,14 +13,14 @@ import 'SelectBondedDevicePage.dart';
 
 // import './helpers/LineChart.dart';
 
-class BluetoothMainPage extends StatefulWidget {
-  const BluetoothMainPage({super.key});
+class BluetoothMainScreen extends StatefulWidget {
+  const BluetoothMainScreen({super.key});
 
   @override
-  State<BluetoothMainPage> createState() => _BluetoothMainPage();
+  State<BluetoothMainScreen> createState() => _BluetoothMainScreen();
 }
 
-class _BluetoothMainPage extends State<BluetoothMainPage> {
+class _BluetoothMainScreen extends State<BluetoothMainScreen> {
   BluetoothState _bluetoothState = BluetoothState.UNKNOWN;
 
   String _address = "...";

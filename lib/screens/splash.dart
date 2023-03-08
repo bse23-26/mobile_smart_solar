@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../app_styles.dart';
 import '../size_config.dart';
 
@@ -11,10 +12,24 @@ class Splash extends StatefulWidget {
 }
 
 class _SplashState extends State<Splash> {
+  void setSystemUI(){
+    SystemChrome.setSystemUIOverlayStyle(
+        const SystemUiOverlayStyle(
+            statusBarColor: Colors.white,
+            statusBarIconBrightness: Brightness.dark,
+            systemNavigationBarColor: Colors.white,
+            systemNavigationBarIconBrightness: Brightness.dark
+        )
+    );
+  }
+
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 5), ()=>Navigator.pushReplacementNamed(context, '/home'));
+    Timer(const Duration(seconds: 5), (){
+      setSystemUI();
+      Navigator.pushReplacementNamed(context, '/home');
+    });
   }
 
   @override
