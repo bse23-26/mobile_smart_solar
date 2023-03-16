@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../app_styles.dart';
 import '../size_config.dart';
 
@@ -12,13 +11,27 @@ class Splash extends StatefulWidget {
 }
 
 class _SplashState extends State<Splash> {
+  double progressValue = 0;
+  Timer? timer;
 
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 3), (){
-      Navigator.pushReplacementNamed(context, '/home');
-    });
+    timer = Timer.periodic(const Duration(milliseconds: 500), (Timer t) => setState(() {
+      if(progressValue<1) {
+        progressValue += 0.2;
+      }
+      else{
+        timer?.cancel();
+        Navigator.pushReplacementNamed(context, '/home');
+      }
+    }));
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -27,22 +40,34 @@ class _SplashState extends State<Splash> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: paddingHorizontal, vertical: paddingHorizontal),
+          padding: EdgeInsets.symmetric(horizontal: paddingHorizontal*5, vertical: paddingHorizontal*9),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              SizedBox(height: SizeConfig.blockSizeVertical! * 10),
               Image(
-                image: const AssetImage('assets/bluetooth_eco.png'),
-                width: SizeConfig.screenWidth,
+                image: const AssetImage('assets/logo.png'),
+                width: SizeConfig.screenWidth!*0.6,
               ),
-              Text("Smart solar relies on bluetooth", style: fontMedium.copyWith(color: black, fontSize: SizeConfig.blockSizeHorizontal!*6)),
               SizedBox(height: SizeConfig.blockSizeVertical! * 2),
-              Text("Enabling your bluetooth connection is important because it helps us get the closest smart solar power device.",
-                style: fontRegular.copyWith(color: darkGrey, fontSize: SizeConfig.blockSizeHorizontal!*5), textAlign: TextAlign.center,),
+              const Text('SmartSolar', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),),
+              SizedBox(height: SizeConfig.blockSizeVertical! * 2),
+              ClipRRect(
+                borderRadius: const BorderRadius.all(Radius.circular(20)),
+                child: LinearProgressIndicator(
+                  value: progressValue,
+                  semanticsLabel: 'Linear progress indicator',
+                  backgroundColor: const Color(0xffD3D3D3),
+                  color: Colors.blue,
+                  minHeight: 8,
+                ),
+              ),
             ],
           )
       ),
     );
   }
 }
+
+

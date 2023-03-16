@@ -25,7 +25,6 @@ class _BatteryScreenState extends State<BatteryScreen> {
 
   @override
   void initState() {
-    print('why');
     super.initState();
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
