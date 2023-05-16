@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../app_styles.dart';
-import '../size_config.dart';
+import 'package:smart_solar/app_styles.dart';
+import 'package:smart_solar/size_config.dart';
+import 'package:smart_solar/routes/route_names.dart';
 
 class Splash extends StatefulWidget {
   const Splash({super.key});
@@ -19,11 +20,11 @@ class _SplashState extends State<Splash> {
     super.initState();
     timer = Timer.periodic(const Duration(milliseconds: 500), (Timer t) => setState(() {
       if(progressValue<1) {
-        progressValue += 0.2;
+        progressValue += 0.25;
       }
       else{
         timer?.cancel();
-        Navigator.pushReplacementNamed(context, '/home');
+        Navigator.pushReplacementNamed(context, Routes.home);
       }
     }));
   }

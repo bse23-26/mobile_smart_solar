@@ -9,10 +9,10 @@ class DiscoveryPage extends StatefulWidget {
   /// If true, discovery starts on page start, otherwise user must press action button.
   final bool start;
 
-  const DiscoveryPage({this.start = true});
+  const DiscoveryPage({super.key, this.start = true});
 
   @override
-  _DiscoveryPage createState() => new _DiscoveryPage();
+  _DiscoveryPage createState() => _DiscoveryPage();
 }
 
 class _DiscoveryPage extends State<DiscoveryPage> {

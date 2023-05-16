@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-
 import 'BackgroundCollectingTask.dart';
 import 'helpers/LineChart.dart';
 import 'helpers/PaintStyle.dart';
 
 class BackgroundCollectedPage extends StatelessWidget {
+  const BackgroundCollectedPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     final BackgroundCollectingTask task =

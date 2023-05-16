@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:smart_solar/cubits/bluetooth_cubit.dart';
 import 'package:smart_solar/screens/battery/battery_progress.dart';
-import '../../app_styles.dart';
-import '../../size_config.dart';
+import 'package:smart_solar/app_styles.dart';
+import 'package:smart_solar/size_config.dart';
 import 'usage_tile.dart';
 
 class BatteryScreen extends StatefulWidget {
@@ -27,19 +29,21 @@ class _BatteryScreenState extends State<BatteryScreen> {
   void initState() {
     super.initState();
     SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
-          systemNavigationBarColor: Colors.transparent,
-          statusBarIconBrightness: Brightness.light,
-          systemNavigationBarIconBrightness: Brightness.light
-      )
+        const SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            systemNavigationBarColor: Colors.transparent,
+            statusBarIconBrightness: Brightness.light,
+            systemNavigationBarIconBrightness: Brightness.light
+        )
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Container(
+      body: BlocBuilder<BluetoothCubit, dynamic>(
+        builder: (context, data) =>
+        Container(
           padding: EdgeInsets.symmetric(
               horizontal: paddingHorizontal*0.5, vertical: paddingHorizontal),
           child: Column(
@@ -49,6 +53,7 @@ class _BatteryScreenState extends State<BatteryScreen> {
                 height: SizeConfig.blockSizeVertical!*4,
               ),
               const Text('Battery Details', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500, color: Colors.blue)),
+              Text(data.toString(), style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500, color: Colors.blue)),
               SizedBox(
                 height: SizeConfig.blockSizeVertical! * 3,
               ),
@@ -67,7 +72,8 @@ class _BatteryScreenState extends State<BatteryScreen> {
               ),
             ],
           ),
-        )
+        ),
+      ),
     );
   }
 }

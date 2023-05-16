@@ -38,9 +38,9 @@ dependencies:
   google_fonts: ^4.0.3
   app_settings: ^4.2.0
   flutter_bluetooth_serial: ^0.4.0
-  flutter_blue: ^0.8.0
   scoped_model: ^2.0.0
   liquid_progress_indicator: ^0.4.0
+  flutter_bloc: ^8.1.2
 
 dev_dependencies:
   flutter_launcher_icons: ^0.11.0
