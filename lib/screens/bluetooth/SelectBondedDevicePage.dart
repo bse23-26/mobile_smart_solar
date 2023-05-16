@@ -10,10 +10,10 @@ class SelectBondedDevicePage extends StatefulWidget {
   /// Then, if they are not available, they would be disabled from the selection.
   final bool checkAvailability;
 
-  const SelectBondedDevicePage({this.checkAvailability = true});
+  const SelectBondedDevicePage({super.key, this.checkAvailability = true});
 
   @override
-  _SelectBondedDevicePage createState() => new _SelectBondedDevicePage();
+  _SelectBondedDevicePage createState() => _SelectBondedDevicePage();
 }
 
 enum _DeviceAvailability {
