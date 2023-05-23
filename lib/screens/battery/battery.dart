@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:smart_solar/cubits/bluetooth_cubit.dart';
+import 'package:smart_solar/controllers/bluetooth_controller.dart';
 import 'package:smart_solar/screens/battery/battery_progress.dart';
 import 'package:smart_solar/app_styles.dart';
 import 'package:smart_solar/size_config.dart';
@@ -28,20 +27,11 @@ class _BatteryScreenState extends State<BatteryScreen> {
   @override
   void initState() {
     super.initState();
-    SystemChrome.setSystemUIOverlayStyle(
-        const SystemUiOverlayStyle(
-            statusBarColor: Colors.transparent,
-            systemNavigationBarColor: Colors.transparent,
-            statusBarIconBrightness: Brightness.light,
-            systemNavigationBarIconBrightness: Brightness.light
-        )
-    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: BlocBuilder<BluetoothCubit, dynamic>(
+    return BlocBuilder<BluetoothController, String>(
         builder: (context, data) =>
         Container(
           padding: EdgeInsets.symmetric(
@@ -49,13 +39,10 @@ class _BatteryScreenState extends State<BatteryScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
+              const Text('Battery Details', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
+              Text(data.toString(), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500, color: Colors.blue)),
               SizedBox(
-                height: SizeConfig.blockSizeVertical!*4,
-              ),
-              const Text('Battery Details', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500, color: Colors.blue)),
-              Text(data.toString(), style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500, color: Colors.blue)),
-              SizedBox(
-                height: SizeConfig.blockSizeVertical! * 3,
+                height: SizeConfig.blockSizeVertical!,
               ),
               const BatteryProgress(fullVoltage: 35, availableVoltage: 15, remainingTime: 380),
               SizedBox(
@@ -73,7 +60,6 @@ class _BatteryScreenState extends State<BatteryScreen> {
             ],
           ),
         ),
-      ),
     );
   }
 }

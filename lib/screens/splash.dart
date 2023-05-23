@@ -40,6 +40,12 @@ class _SplashState extends State<Splash> {
     SizeConfig().init(context);
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
+        toolbarHeight: 0,
+      ),
       body: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: paddingHorizontal*5, vertical: paddingHorizontal*9),
           child: Column(

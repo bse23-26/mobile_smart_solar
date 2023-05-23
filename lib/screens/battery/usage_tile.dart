@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../size_config.dart';
+import 'package:smart_solar/size_config.dart';
 
 class UsageTile extends StatelessWidget {
   final String title;

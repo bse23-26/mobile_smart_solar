@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:smart_solar/controllers/bluetooth_controller.dart';
+import 'ChatPage.dart';
 import 'SelectBondedDevicePage.dart';
 
 class BluetoothMainScreen extends StatefulWidget {
@@ -76,91 +79,91 @@ class _BluetoothMainScreen extends State<BluetoothMainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: ListView(
-        children: <Widget>[
-          // const Divider(),
-          SwitchListTile(
-            title: const Text('Enable Bluetooth'),
-            value: _bluetoothState.isEnabled,
-            onChanged: (bool value) {
-              // Do the request and update with the true value then
-              future() async {
-                // async lambda seems to not working
-                if (value) {
-                  await FlutterBluetoothSerial.instance.requestEnable();
-                } else {
-                  await FlutterBluetoothSerial.instance.requestDisable();
-                }
-              }
+    return BlocBuilder<BluetoothController, String>(
+          builder: (context, data) =>ListView(
+            children: <Widget>[
+              // const Divider(),
+              SwitchListTile(
+                title: const Text('Enable Bluetooth'),
+                value: _bluetoothState.isEnabled,
+                onChanged: (bool value) {
+                  // Do the request and update with the true value then
+                  future() async {
+                    // async lambda seems to not working
+                    if (value) {
+                      await FlutterBluetoothSerial.instance.requestEnable();
+                    } else {
+                      await FlutterBluetoothSerial.instance.requestDisable();
+                    }
+                  }
 
-              future().then((_) {
-                setState(() {});
-              });
-            },
-          ),
-          ListTile(
-            title: const Text('Bluetooth status'),
-            subtitle: Text(_bluetoothState.toString()),
-            trailing: ElevatedButton(
-              child: const Text('Settings'),
-              onPressed: () {
-                FlutterBluetoothSerial.instance.openSettings();
-              },
-            ),
-          ),
-          ListTile(
-            title: const Text('Local adapter address'),
-            subtitle: Text(_address),
-          ),
-          ListTile(
-            title: const Text('Local adapter name'),
-            subtitle: Text(_name),
-            onLongPress: null,
-          ),
-          ListTile(
-            title: _discoverableTimeoutSecondsLeft == 0
-                ? const Text("Discoverable")
-                : Text(
+                  future().then((_) {
+                    setState(() {});
+                  });
+                },
+              ),
+              ListTile(
+                title: const Text('Bluetooth status'),
+                subtitle: Text(_bluetoothState.toString()),
+                trailing: ElevatedButton(
+                  child: const Text('Settings'),
+                  onPressed: () {
+                    FlutterBluetoothSerial.instance.openSettings();
+                  },
+                ),
+              ),
+              ListTile(
+                title: const Text('Local adapter address'),
+                subtitle: Text(_address),
+              ),
+              ListTile(
+                title: const Text('Local adapter name'),
+                subtitle: Text(_name),
+                onLongPress: null,
+              ),
+              ListTile(
+                title: _discoverableTimeoutSecondsLeft == 0
+                    ? const Text("Discoverable")
+                    : Text(
                     "Discoverable for ${_discoverableTimeoutSecondsLeft}s"),
-            subtitle: const Text("PsychoX-Luna"),
+                subtitle: const Text("PsychoX-Luna"),
+              ),
+              const Divider(),
+              const ListTile(title: Text('Devices discovery and connection')),
+              ListTile(
+                title: ElevatedButton(
+                  child: const Text('Connect to paired device to chat'),
+                  onPressed: (){
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return const SelectBondedDevicePage(checkAvailability: false);
+                        },
+                      ),
+                    ).then((value){
+                      if (value != null) {
+                        log('Connect -> selected ${value.address}');
+                        // context.read<BluetoothController>().connect(value);
+                        _startChat(context, value);
+                      } else {
+                        log('Connect -> no device selected');
+                      }
+                    });
+                  },
+                ),
+              ),
+            ],
           ),
-          const Divider(),
-          const ListTile(title: Text('Devices discovery and connection')),
-          ListTile(
-            title: ElevatedButton(
-              child: const Text('Connect to paired device to chat'),
-              onPressed: () async {
-                final BluetoothDevice? selectedDevice =
-                    await Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) {
-                      return const SelectBondedDevicePage(checkAvailability: false);
-                    },
-                  ),
-                );
-
-                if (selectedDevice != null) {
-                  log('Connect -> selected ${selectedDevice.address}');
-                  // _startChat(context, selectedDevice);
-                } else {
-                  log('Connect -> no device selected');
-                }
-              },
-            ),
-          ),
-        ],
-      ),
     );
   }
 
-  // void _startChat(BuildContext context, BluetoothDevice server) {
-  //   Navigator.of(context).push(
-  //     MaterialPageRoute(
-  //       builder: (context) {
-  //         return ChatPage(server: server);
-  //       },
-  //     ),
-  //   );
-  // }
+void _startChat(BuildContext context, BluetoothDevice server) {
+  Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (context) {
+        return ChatPage(server: server);
+      },
+    ),
+  );
+}
 }

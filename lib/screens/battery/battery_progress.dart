@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_progress_indicator/liquid_progress_indicator.dart';
-import '../../size_config.dart';
+import 'package:smart_solar/size_config.dart';
 
 class BatteryProgress extends StatelessWidget {
   final double fullVoltage;

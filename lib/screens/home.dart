@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:smart_solar/main.dart';
 import 'package:smart_solar/screens/battery/battery.dart';
 import 'package:smart_solar/screens/bluetooth/BluetoothMainScreen.dart';
 import 'package:smart_solar/screens/notifications.dart';
+
+import 'account.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -17,10 +20,7 @@ class _HomePageState extends State<HomePage> {
     BluetoothMainScreen(),
     BatteryScreen(),
     NotificationScreen(),
-    Text(
-      'Index 3: Account',
-      style: optionStyle,
-    ),
+    Account(),
   ];
 
   void _onItemTapped(int index) {
@@ -32,8 +32,17 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: _widgetOptions.elementAt(_selectedIndex),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
+        toolbarHeight: 0,
+      ),
+      body: SafeArea(
+        child: Container(
+          child: _widgetOptions.elementAt(_selectedIndex),
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
@@ -58,6 +67,7 @@ class _HomePageState extends State<HomePage> {
         selectedItemColor: Colors.blue,
         unselectedItemColor: Colors.grey,
         onTap: _onItemTapped,
+        backgroundColor: Colors.white,
         type: BottomNavigationBarType.fixed,
       ),
     );
