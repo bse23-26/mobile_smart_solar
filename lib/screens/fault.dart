@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:smart_solar/controllers/fault_controller.dart';
 
@@ -16,28 +18,37 @@ class _FaultState extends State<Fault> {
   final GlobalKey<FormState> _form = GlobalKey<FormState>();
 
   _submit(){
-    FaultController.post({
+    Map<String, String> map = {
       'subject': _subject.text,
       'description': _description.text
-    }).then((value){
-      if(value['error']){
-        _snackBarAlert(value['res']);
-      }else{
-        Navigator.of(context).pop();
+    };
+    FaultController.post(map).then((value){
+      try {
+        if (value['error']) {
+          _snackBarAlert(value['res'], "error");
+        } else {
+          _snackBarAlert(value['res']['message'], "success");
+          _subject.text = "";
+          _description.text = "";
+          // Navigator.of(context).pop();
+        }
+      }
+      catch(p, e){
+        log(e.toString());
       }
     });
   }
 
-  _snackBarAlert(String message){
+  _snackBarAlert(String message, String type){
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         backgroundColor: Colors.white,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
-          side: const BorderSide(width: 1, color: Colors.red),
+          side: BorderSide(width: 1, color: type=="error"?Colors.red:Colors.green),
           borderRadius: BorderRadius.circular(24),
         ),
         // elevation: 0,
-        content: Text(message, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.red))
+        content: Text(message, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: type=="error"?Colors.red:Colors.green))
     ));
   }
 

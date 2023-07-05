@@ -2,15 +2,15 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'package:smart_solar/requests/requests.dart';
-import 'package:smart_solar/models/user.dart';
+
+import '../models/user.dart';
 
 class FaultController {
   static Future<Map<String, dynamic>> post(Map<String, String> data) async {
     try {
-      Requests.setHeader('Authorization', 'Bearer ${User.token!}');
-
       var request = http.MultipartRequest('POST', Requests.getUrl('fault'));
       request.fields.addAll(data);
+      request.fields.addAll({'token':User.token!});
       request.headers.addAll(Requests.headers);
       http.StreamedResponse response = await request.send();
 
@@ -20,7 +20,7 @@ class FaultController {
       };
 
       if (response.statusCode == 200) {
-        responseObj['res'] = jsonDecode(await response.stream.bytesToString()) as Map<String, String>;
+        responseObj['res'] = jsonDecode(await response.stream.bytesToString()) as Map<String, dynamic>;
       }
       else if (response.statusCode == 422) {
         responseObj['error'] = true;
@@ -35,7 +35,7 @@ class FaultController {
       }
 
       return responseObj;
-    } catch (e) {
+    } catch (e, st) {
       return {'error': true, 'res': e.toString()};
     }
   }

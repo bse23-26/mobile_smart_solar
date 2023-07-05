@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:smart_solar/main.dart';
-import 'package:smart_solar/screens/battery/battery.dart';
+import 'package:smart_solar/screens/power/power_screen.dart';
 import 'package:smart_solar/screens/bluetooth/BluetoothMainScreen.dart';
 import 'package:smart_solar/screens/notifications.dart';
-
 import 'account.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({Key? key, this.pageName=''}) : super(key: key);
+  final String pageName;
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -15,7 +14,14 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
-  static const TextStyle optionStyle = TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
+  @override
+  void initState() {
+    super.initState();
+    if(widget.pageName == 'notifications'){
+      _selectedIndex = 2;
+    }
+  }
+
   static const List<Widget> _widgetOptions = <Widget>[
     BluetoothMainScreen(),
     BatteryScreen(),

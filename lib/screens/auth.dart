@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:smart_solar/controllers/auth_controller.dart';
 import 'package:smart_solar/routes/route_names.dart';
 import 'package:smart_solar/app_styles.dart';
+import 'package:geolocator/geolocator.dart';
+
+import '../requests/firebase_api.dart';
 
 class Auth extends StatefulWidget {
   const Auth({Key? key}) : super(key: key);
@@ -12,16 +15,17 @@ class Auth extends StatefulWidget {
 
 class _AuthState extends State<Auth> {
   bool _loginHidePass = true;
-  final TextEditingController _phoneOrEmail = TextEditingController();
+  final TextEditingController _telOrEmail = TextEditingController();
   final TextEditingController _loginPassword = TextEditingController();
   final GlobalKey<FormState> _loginForm = GlobalKey<FormState>();
 
   bool _signHidePass = true;
   bool _hideConfirmPass = true;
   final TextEditingController _name = TextEditingController();
-  final TextEditingController _phone = TextEditingController();
+  final TextEditingController _tel = TextEditingController();
   final TextEditingController _email = TextEditingController();
   final TextEditingController _deviceId = TextEditingController();
+  final TextEditingController _location = TextEditingController();
   final TextEditingController _signPassword = TextEditingController();
   final TextEditingController _confirmPass = TextEditingController();
   final GlobalKey<FormState> _signForm = GlobalKey<FormState>();
@@ -46,41 +50,84 @@ class _AuthState extends State<Auth> {
     return regex.hasMatch(value);
   }
 
-  bool _validatePhone(String value) {
+  bool _validateTel(String value) {
     const String pattern = r'(^(?:[+0]9)?[0-9]{10,12}$)';
     RegExp regex = RegExp(pattern);
     return regex.hasMatch(value);
   }
 
   _login(){
-    Map<String, String> credentials = {
-      'password': _loginPassword.text
-    };
-    credentials[_validateEmail(_phoneOrEmail.text)?'email':'phone'] = _phoneOrEmail.text;
+    FirebaseApi.instance.addToken().then((fcmToken){
+      if(fcmToken != null){
+        Map<String, String> credentials = {
+          'password': _loginPassword.text,
+          'fcmToken': fcmToken
+        };
+        credentials[_validateEmail(_telOrEmail.text)?'email':'tel'] = _telOrEmail.text;
 
-    AuthController.login(credentials).then((value){
-      if(value['error']){
-        _snackBarAlert(value['res']);
+        AuthController.login(credentials).then((value){
+          if(value['error']){
+            _snackBarAlert(value['res']);
+          }else{
+            Navigator.pushReplacementNamed(context, Routes.home);
+          }
+        });
       }else{
-        Navigator.pushReplacementNamed(context, Routes.home);
+        _snackBarAlert('An error occurred!');
       }
     });
   }
 
   _signUp(){
-    AuthController.signUp({
-      'name': _name.text,
-      'phone': _phone.text,
-      'email': _email.text,
-      'deviceId': _deviceId.text,
-      'password': _signPassword.text
-    }).then((value){
-      if(value['error']){
-        _snackBarAlert(value['res']);
+    FirebaseApi.instance.addToken().then((fcmToken){
+      if(fcmToken != null){
+        AuthController.signUp({
+          'name': _name.text,
+          'tel': _tel.text,
+          'email': _email.text,
+          'deviceId': _deviceId.text,
+          'location': _location.text,
+          'password': _signPassword.text,
+          "password_confirmation": _confirmPass.text,
+          "fcmToken": fcmToken
+        }).then((value){
+          if(value['error']){
+            _snackBarAlert(value['res']);
+          }else{
+            Navigator.pushReplacementNamed(context, Routes.home);
+          }
+        });
       }else{
-        Navigator.pushReplacementNamed(context, Routes.home);
+        _snackBarAlert('An error occurred!');
       }
     });
+  }
+
+  Future<Position> _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Test if location services are enabled.
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return Future.error('Please enable location services.');
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error('Location permissions are denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are denied forever, handle appropriately.
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+
+    return await Geolocator.getCurrentPosition();
   }
 
   @override
@@ -107,19 +154,19 @@ class _AuthState extends State<Auth> {
                    const Text('Login', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
                     SizedBox(height: paddingHorizontal),
                     TextFormField(
-                      controller: _phoneOrEmail,
+                      controller: _telOrEmail,
                       decoration: const InputDecoration(
                         suffixIcon: Icon(Icons.account_circle),
                         border: OutlineInputBorder(),
-                        hintText: 'Email Or Phone',
+                        hintText: 'Email Or Tel',
                       ),
                       validator: (String? value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please Enter Your Email or Phone';
+                          return 'Please Enter Your Email or Tel';
                         }
 
-                        if(!(_validateEmail(value) || _validatePhone(value))){
-                          return 'Please Enter Valid Phone Or Email';
+                        if(!(_validateEmail(value) || _validateTel(value))){
+                          return 'Please Enter Valid Tel Or Email';
                         }
                         return null;
                       },
@@ -190,19 +237,19 @@ class _AuthState extends State<Auth> {
                     ),
                     SizedBox(height: paddingHorizontal),
                     TextFormField(
-                      controller: _phone,
+                      controller: _tel,
                       decoration: const InputDecoration(
                         suffixIcon: Icon(Icons.phone),
                         border: OutlineInputBorder(),
-                        hintText: 'Phone',
+                        hintText: 'Tel',
                       ),
                       validator: (String? value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please Enter Your Phone Number';
+                          return 'Please Enter Your Tel Number';
                         }
 
-                        if(!_validatePhone(value)){
-                          return 'Please Enter a Valid Phone Number';
+                        if(!_validateTel(value)){
+                          return 'Please Enter a Valid Tel Number';
                         }
                         return null;
                       },
@@ -239,6 +286,30 @@ class _AuthState extends State<Auth> {
                           return 'Please Enter Your Device Id';
                         }
                         return null;
+                      },
+                    ),
+                    SizedBox(height: paddingHorizontal),
+                    TextFormField(
+                      controller: _location,
+                      decoration: const InputDecoration(
+                        suffixIcon: Icon(Icons.location_on_outlined),
+                        border: OutlineInputBorder(),
+                        hintText: 'Location',
+                      ),
+                      validator: (String? value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please Enter Your Location';
+                        }
+                        return null;
+                      },
+                      onTap: (){
+                        _determinePosition().then((position){
+                          setState(() {
+                            _location.text = "${position.latitude},${position.longitude}";
+                          });
+                        }).catchError((error){
+                          _snackBarAlert(error.toString());
+                        });
                       },
                     ),
                     SizedBox(height: paddingHorizontal),

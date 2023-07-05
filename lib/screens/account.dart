@@ -4,6 +4,8 @@ import 'package:smart_solar/app_styles.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:smart_solar/routes/route_names.dart';
 
+import '../models/user.dart';
+
 class Account extends StatelessWidget {
   const Account({Key? key}) : super(key: key);
 
@@ -56,15 +58,15 @@ class Account extends StatelessWidget {
               ),
               child: ListTile(
                 isThreeLine: true,
-                leading: Column(
+                leading: const Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
+                  children: [
                     Icon(Icons.account_circle,color: Colors.blue, size: 40),
                   ],
                 ),
-                title: Text('Rashidah Magezi', style: TextStyle(fontSize: 18)),
-                subtitle: Text('+256700225554 \nrmagezitumukunde@gmail.com', style: TextStyle(fontSize: 16, color: Colors.black87)),
+                title: Text(User.name!, style: const TextStyle(fontSize: 18)),
+                subtitle: Text('${User.tel!} \n${User.email!}', style: const TextStyle(fontSize: 16, color: Colors.black87)),
                 minLeadingWidth: 1,
               ),
             ),
@@ -80,21 +82,40 @@ class Account extends StatelessWidget {
               child: Column(
                 children: [
                   const Divider(color: Colors.white),
-                  const ListTile(
+                  ListTile(
                     isThreeLine: false,
                     dense: true,
-                    leading: Icon(Icons.email, color: Colors.blue, size: 30),
-                    title: Text('Communications', style: TextStyle(fontSize: 18)),
-                    trailing: Icon(Icons.arrow_forward_ios, size: 20, color: Colors.blue),
+                    leading: const Icon(Icons.solar_power_sharp, color: Colors.blue, size: 30),
+                    title: const Text('Device Details', style: TextStyle(fontSize: 18)),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 20, color: Colors.blue),
                     minLeadingWidth: 1,
+                    onTap: (){
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context){
+                            return AlertDialog(
+                              title: const Text('Device Id'),
+                              content: Text(User.deviceId!),
+                              actions: <Widget>[
+                                TextButton(
+                                  child: const Text('Ok'),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                              ],
+                            );
+                          }
+                      );
+                    },
                   ),
                   const Divider(color: Colors.black54, indent: 20, endIndent: 20),
                   ListTile(
                     isThreeLine: false,
                     dense: true,
-                    leading: Icon(Icons.help, color: Colors.blue, size: 30),
-                    title: Text('Report fault', style: TextStyle(fontSize: 18)),
-                    trailing: Icon(Icons.arrow_forward_ios, size: 20, color: Colors.blue),
+                    leading: const Icon(Icons.help, color: Colors.blue, size: 30),
+                    title: const Text('Report fault', style: TextStyle(fontSize: 18)),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 20, color: Colors.blue),
                     minLeadingWidth: 1,
                     onTap: (){
                       Navigator.of(context).pushNamed(Routes.fault);
@@ -109,15 +130,14 @@ class Account extends StatelessWidget {
                     trailing: const Icon(Icons.arrow_forward_ios, size: 20, color: Colors.blue),
                     minLeadingWidth: 1,
                     onTap: (){
-                      // AlertDialog();
                       showAboutDialog(
                           context: context,
                         applicationName: 'SmartSolar',
                         applicationVersion: 'version 1.0',
                         applicationIcon: Image.asset('assets/logo.png', width: 60, height: 60),
                         children: [
-                          Column(
-                            children: const [
+                          const Column(
+                            children: [
                               Text('Made By BSE23-26'),
                               SizedBox(height: 5),
                               Text('Engineers:', style: TextStyle(color: Colors.blue, fontSize: 20)),

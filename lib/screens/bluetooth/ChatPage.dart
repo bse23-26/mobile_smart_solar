@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
@@ -7,10 +8,10 @@ import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 class ChatPage extends StatefulWidget {
   final BluetoothDevice server;
 
-  const ChatPage({required this.server});
+  const ChatPage({super.key, required this.server});
 
   @override
-  _ChatPage createState() => new _ChatPage();
+  State<ChatPage> createState() => _ChatPage();
 }
 
 class _Message {
@@ -27,9 +28,8 @@ class _ChatPage extends State<ChatPage> {
   List<_Message> messages = List<_Message>.empty(growable: true);
   String _messageBuffer = '';
 
-  final TextEditingController textEditingController =
-      new TextEditingController();
-  final ScrollController listScrollController = new ScrollController();
+  final TextEditingController textEditingController = TextEditingController();
+  final ScrollController listScrollController = ScrollController();
 
   bool isConnecting = true;
   bool get isConnected => (connection?.isConnected ?? false);
@@ -40,9 +40,9 @@ class _ChatPage extends State<ChatPage> {
   void initState() {
     super.initState();
 
-    BluetoothConnection.toAddress(widget.server.address).then((_connection) {
-      print('Connected to the device');
-      connection = _connection;
+    BluetoothConnection.toAddress(widget.server.address).then(($connection) {
+      log('Connected to the device');
+      connection = $connection;
       setState(() {
         isConnecting = false;
         isDisconnecting = false;
@@ -56,17 +56,17 @@ class _ChatPage extends State<ChatPage> {
         // If we except the disconnection, `onDone` should be fired as result.
         // If we didn't except this (no flag set), it means closing by remote.
         if (isDisconnecting) {
-          print('Disconnecting locally!');
+          log('Disconnecting locally!');
         } else {
-          print('Disconnected remotely!');
+          log('Disconnected remotely!');
         }
-        if (this.mounted) {
+        if (mounted) {
           setState(() {});
         }
       });
     }).catchError((error) {
-      print('Cannot connect, exception occured');
-      print(error);
+      log('Cannot connect, exception occurred');
+      log(error);
     });
   }
 
@@ -84,39 +84,44 @@ class _ChatPage extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Row> list = messages.map((_message) {
+    final List<Row> list = messages.map(($message) {
       return Row(
+        mainAxisAlignment: $message.whom == clientID
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
         children: <Widget>[
           Container(
-            child: Text(
-                (text) {
-                  return text == '/shrug' ? '¯\\_(ツ)_/¯' : text;
-                }(_message.text.trim()),
-                style: TextStyle(color: Colors.white)),
-            padding: EdgeInsets.all(12.0),
-            margin: EdgeInsets.only(bottom: 8.0, left: 8.0, right: 8.0),
+            padding: const EdgeInsets.all(12.0),
+            margin: const EdgeInsets.only(bottom: 8.0, left: 8.0, right: 8.0),
             width: 222.0,
             decoration: BoxDecoration(
                 color:
-                    _message.whom == clientID ? Colors.blueAccent : Colors.grey,
+                    $message.whom == clientID ? Colors.blueAccent : Colors.grey,
                 borderRadius: BorderRadius.circular(7.0)),
+            child: Text(
+                (text) {
+                  return text == '/shrug' ? '¯\\_(ツ)_/¯' : text;
+                }($message.text.trim()),
+                style: const TextStyle(color: Colors.white)),
           ),
         ],
-        mainAxisAlignment: _message.whom == clientID
-            ? MainAxisAlignment.end
-            : MainAxisAlignment.start,
       );
     }).toList();
 
     final serverName = widget.server.name ?? "Unknown";
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black,
+          elevation: 0,
           title: (isConnecting
-              ? Text('Connecting chat to ' + serverName + '...')
+              ? Text('Connecting chat to $serverName...')
               : isConnected
-                  ? Text('Live chat with ' + serverName)
-                  : Text('Chat log with ' + serverName))),
+                  ? Text('Live chat with $serverName')
+                  : Text('Chat log with $serverName'))),
       body: SafeArea(
+
         child: Column(
           children: <Widget>[
             Flexible(
@@ -164,11 +169,11 @@ class _ChatPage extends State<ChatPage> {
   void _onDataReceived(Uint8List data) {
     // Allocate buffer for parsed data
     int backspacesCounter = 0;
-    data.forEach((byte) {
+    for (var byte in data) {
       if (byte == 8 || byte == 127) {
         backspacesCounter++;
       }
-    });
+    }
     Uint8List buffer = Uint8List(data.length - backspacesCounter);
     int bufferIndex = buffer.length;
 
@@ -214,19 +219,19 @@ class _ChatPage extends State<ChatPage> {
     text = text.trim();
     textEditingController.clear();
 
-    if (text.length > 0) {
+    if (text.isNotEmpty) {
       try {
-        connection!.output.add(Uint8List.fromList(utf8.encode(text + "\r\n")));
+        connection!.output.add(Uint8List.fromList(utf8.encode("$text\r\n")));
         await connection!.output.allSent;
 
         setState(() {
           messages.add(_Message(clientID, text));
         });
 
-        Future.delayed(Duration(milliseconds: 333)).then((_) {
+        Future.delayed(const Duration(milliseconds: 333)).then((_) {
           listScrollController.animateTo(
               listScrollController.position.maxScrollExtent,
-              duration: Duration(milliseconds: 333),
+              duration: const Duration(milliseconds: 333),
               curve: Curves.easeOut);
         });
       } catch (e) {

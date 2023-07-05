@@ -21,15 +21,15 @@ class Storage{
   }
 
   Future<Map<String, dynamic>> _readJson(String key) async {
-    return jsonDecode((await _storage.read(key: key))!) as Map<String, dynamic>;
+    return jsonDecode((await _storage.read(key: key)).toString()) as Map<String, dynamic>;
   }
 
   Future<void> write(String key, dynamic data) async {
     String dataType = (data is Map)?'json':'string';
 
-    Map<String, String> definitions = {};
+    Map<String, dynamic> definitions = {};
     if(await _storage.containsKey(key: _definitionsKey)){
-      definitions = await _readJson(_definitionsKey) as Map<String, String>;
+      definitions = await _readJson(_definitionsKey);
     }
     definitions[key] = dataType;
     await _writeJson(_definitionsKey, definitions);
@@ -38,15 +38,20 @@ class Storage{
 
   Future<StorageData> read(String key) async {
     if(await _storage.containsKey(key: key)){
-      Map<String, String> definitions = await _readJson(_definitionsKey) as Map<String, String>;
+      Map<String, dynamic> definitions = await _readJson(_definitionsKey);
       StorageDataType dataType = (definitions[key]! =='json')?StorageDataType.json:StorageDataType.string;
       return StorageData(dataType:dataType, data:(dataType == StorageDataType.json)?(await _readJson(key)):(await _readStr(key)));
     }
+
     return StorageData(dataType:StorageDataType.undefined, data:null);
   }
 
   Future<void> remove(String key) async {
     await _storage.delete(key: key);
+  }
+
+  Future<bool> containsKeys(String key){
+    return _storage.containsKey(key: key);
   }
 }
 

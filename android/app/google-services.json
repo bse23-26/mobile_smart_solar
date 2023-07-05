@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "796445885593",
+    "project_id": "smart-solar-91c09",
+    "storage_bucket": "smart-solar-91c09.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:796445885593:android:632346c4d59ad74cf8e408",
+        "android_client_info": {
+          "package_name": "com.example.smart_solar"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "796445885593-c1o5u5r1dhdjolni6q9bvhq6cs2pl00g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD4UHHg_-4yv1ZyL1UitdFnQE5dPVG0ncA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "796445885593-c1o5u5r1dhdjolni6q9bvhq6cs2pl00g.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

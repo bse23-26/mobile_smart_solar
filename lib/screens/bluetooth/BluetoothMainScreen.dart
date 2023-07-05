@@ -7,6 +7,11 @@ import 'package:smart_solar/controllers/bluetooth_controller.dart';
 import 'ChatPage.dart';
 import 'SelectBondedDevicePage.dart';
 
+enum AlertType {
+  error,
+  success,
+}
+
 class BluetoothMainScreen extends StatefulWidget {
   const BluetoothMainScreen({super.key});
 
@@ -19,6 +24,7 @@ class _BluetoothMainScreen extends State<BluetoothMainScreen> {
 
   String _address = "...";
   String _name = "...";
+  String _connectionState = "No";
 
   Timer? _discoverableTimeoutTimer;
   int _discoverableTimeoutSecondsLeft = 0;
@@ -26,11 +32,17 @@ class _BluetoothMainScreen extends State<BluetoothMainScreen> {
   @override
   void initState() {
     super.initState();
+    context.read<BluetoothController>().connectSavedDevice();
 
     // Get current state
     FlutterBluetoothSerial.instance.state.then((state) {
       setState(() {
         _bluetoothState = state;
+        if(!_bluetoothState.isEnabled) {
+          _connectionState = 'No';
+        }else{
+          context.read<BluetoothController>().connectSavedDevice();
+        }
       });
     });
 
@@ -68,6 +80,8 @@ class _BluetoothMainScreen extends State<BluetoothMainScreen> {
         _discoverableTimeoutSecondsLeft = 0;
       });
     });
+
+    _connectionState = context.read<BluetoothController>().isConnected?'Yes':'No';
   }
 
   @override
@@ -77,12 +91,34 @@ class _BluetoothMainScreen extends State<BluetoothMainScreen> {
     super.dispose();
   }
 
+  _snackBarAlert({required String message, AlertType type=AlertType.error}){
+    Color color = type==AlertType.error?Colors.red:Colors.green;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        backgroundColor: Colors.white,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          side: BorderSide(width: 1, color: color),
+          borderRadius: BorderRadius.circular(24),
+        ),
+        duration: const Duration(seconds: 1),
+        // elevation: 0,
+        content: Text(message, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: color))
+    ));
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<BluetoothController, String>(
-          builder: (context, data) =>ListView(
+    return BlocBuilder<BluetoothController, BluetoothData?>(
+        builder: (context, data) {
+          if(data?.emitType == BluetoothEmitType.connectionState){
+            WidgetsBinding.instance.addPostFrameCallback((_){
+              setState(() {
+                _connectionState = data!.data;
+              });
+            });
+          }
+          return ListView(
             children: <Widget>[
-              // const Divider(),
               SwitchListTile(
                 title: const Text('Enable Bluetooth'),
                 value: _bluetoothState.isEnabled,
@@ -128,11 +164,15 @@ class _BluetoothMainScreen extends State<BluetoothMainScreen> {
                     "Discoverable for ${_discoverableTimeoutSecondsLeft}s"),
                 subtitle: const Text("PsychoX-Luna"),
               ),
+              ListTile(
+                title: const Text('Bluetooth device connected?'),
+                subtitle: Text(_connectionState),
+              ),
               const Divider(),
               const ListTile(title: Text('Devices discovery and connection')),
               ListTile(
                 title: ElevatedButton(
-                  child: const Text('Connect to paired device to chat'),
+                  child: const Text('Connect/Disconnect a paired device.'),
                   onPressed: (){
                     Navigator.of(context).push(
                       MaterialPageRoute(
@@ -142,10 +182,12 @@ class _BluetoothMainScreen extends State<BluetoothMainScreen> {
                       ),
                     ).then((value){
                       if (value != null) {
+                        _snackBarAlert(message: '${value.name} was selected', type: AlertType.success);
                         log('Connect -> selected ${value.address}');
-                        // context.read<BluetoothController>().connect(value);
-                        _startChat(context, value);
+                        context.read<BluetoothController>().connect(value);
+                        // _startChat(context, value);
                       } else {
+                        _snackBarAlert(message: 'No device selected');
                         log('Connect -> no device selected');
                       }
                     });
@@ -153,17 +195,18 @@ class _BluetoothMainScreen extends State<BluetoothMainScreen> {
                 ),
               ),
             ],
-          ),
+          );
+        }
     );
   }
 
-void _startChat(BuildContext context, BluetoothDevice server) {
-  Navigator.of(context).push(
-    MaterialPageRoute(
-      builder: (context) {
-        return ChatPage(server: server);
-      },
-    ),
-  );
-}
+  void _startChat(BuildContext context, BluetoothDevice server) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) {
+          return ChatPage(server: server);
+        },
+      ),
+    );
+  }
 }

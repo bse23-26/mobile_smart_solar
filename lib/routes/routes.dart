@@ -8,5 +8,6 @@ var routes = {
   Routes.root: (context) => const Splash(),
   Routes.auth: (context) => const Auth(),
   Routes.home: (context) => const HomePage(),
+  Routes.notifications: (context) => const HomePage(pageName: 'notifications'),
   Routes.fault: (context) => const Fault()
 };
